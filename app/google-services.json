@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "765468083497",
+    "firebase_url": "https://naordating2.firebaseio.com",
+    "project_id": "naordating2",
+    "storage_bucket": "naordating2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:765468083497:android:fc6c3f72571fae1e",
+        "android_client_info": {
+          "package_name": "com.example.naormalka.naordating2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "765468083497-salhgc5bdlg038j986tv9q4qt5sj88pc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.naormalka.naordating2",
+            "certificate_hash": "90acf71dec94858f51c94babd7503619e400b63e"
+          }
+        },
+        {
+          "client_id": "765468083497-0l0140bdh2aoo8f5qgvab9dddai39gm3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-31w2G_IJOchVD0S9THYzfX1u291BEwA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "765468083497-0l0140bdh2aoo8f5qgvab9dddai39gm3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
