@@ -2,6 +2,7 @@ package com.example.naormalka.naordating2;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,7 +36,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
+import java.util.jar.JarException;
 
 
 public class MainActivity extends AppCompatActivity
@@ -44,6 +49,7 @@ public class MainActivity extends AppCompatActivity
 
     ImageView ivProfile;
     TextView etProfile;
+    TextView tvfriends;
 
 
     Button btnLogOut;
@@ -51,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     ArrayList<String> al;
     ArrayAdapter arrayAdapter;
     FirebaseAuth mAuth;
+    SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +66,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mAuth = FirebaseAuth.getInstance();
+
 
 
 //btn click register
@@ -82,11 +90,18 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
+
+
+
+
+
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         View hView = navigationView.getHeaderView(0);
         ivProfile = (ImageView) hView.findViewById(R.id.profile);
         etProfile = (TextView) hView.findViewById(R.id.etProfile);
+        tvfriends = (TextView) hView.findViewById(R.id.tvfriends);
         etProfile.setText(currentUser.getDisplayName());
         if (currentUser.getPhotoUrl() != null) {
             Glide.with(this).load(currentUser.getPhotoUrl().toString()).into(ivProfile);

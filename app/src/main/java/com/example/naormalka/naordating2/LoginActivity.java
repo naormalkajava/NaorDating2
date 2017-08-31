@@ -1,6 +1,6 @@
 package com.example.naormalka.naordating2;
-
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -56,6 +56,8 @@ public class LoginActivity extends AppCompatActivity {
     EditText etemail;
     EditText etPassword;
     RadioGroup mRadioGroup;
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
 
 
     @Override
@@ -63,6 +65,12 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
+        pref = getSharedPreferences("Notes", MODE_PRIVATE);
+        editor = pref.edit();
+
+
+        //
+        //
         firebaseAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -101,11 +109,11 @@ public class LoginActivity extends AppCompatActivity {
                         if (!task.isSuccessful()) {
                             Toast.makeText(LoginActivity.this, "sign up error", Toast.LENGTH_SHORT).show();
                         } else {
-                            String userId = mAuth.getCurrentUser().getUid();
-                            DatabaseReference currentUserDb = FirebaseDatabase.getInstance().getReference().child("User")
-                                    .child(radioButton.getText().toString())
-                                    .child(userId).child("name");
-                            currentUserDb.setValue(name);
+
+                            FirebaseUser currentUser = mAuth.getCurrentUser();
+                            DatabaseReference userref = FirebaseDatabase.getInstance().getReference("AppUser").child(currentUser.getUid());
+                            AppUserByEmail user = new AppUserByEmail(name,currentUser.getUid(),null,radioButton.getText().toString());
+                            userref.setValue(user);
                         }
                     }
                 });
@@ -121,6 +129,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(LoginResult loginResult) {
+
                 Log.d(TAG, "facebook:onSuccess:" + loginResult);
                 handleFacebookAccessToken(loginResult.getAccessToken());
                 AccessToken accessToken = loginResult.getAccessToken();
@@ -131,19 +140,23 @@ public class LoginActivity extends AppCompatActivity {
                             public void onCompleted(JSONObject object, GraphResponse response) {
                                 Log.v("LoginActivity", response.toString());
 
+
                                 try {
-                                    String  birthday = object.getString("birthday");
+                                    String gender = object.getString("gender");
+                                    editor.putString("gender",gender);
+                                    editor.commit();
+
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
 
                             }
                         });
+
                 Bundle parameters = new Bundle();
-                parameters.putString("login","birthday");
+                parameters.putString("fields", "id,name,gender");
                 request.setParameters(parameters);
                 request.executeAsync();
-
             }
 
             @Override
@@ -192,10 +205,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void registerToFireBase() {
+        String gender = pref.getString("gender", "");
+
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference userref = FirebaseDatabase.getInstance().getReference("User").child(currentUser.getUid());
-        com.example.naormalka.naordating2.User u = new com.example.naormalka.naordating2.User(currentUser);
-        userref.setValue(u);
+        DatabaseReference userref = FirebaseDatabase.getInstance().getReference("AppUser").child(currentUser.getUid());
+       AppUser user = new AppUser(currentUser,gender);
+        userref.setValue(user);
 
     }
 
