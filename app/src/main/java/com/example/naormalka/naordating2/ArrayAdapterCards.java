@@ -19,6 +19,7 @@ import java.util.List;
 public class ArrayAdapterCards extends android.widget.ArrayAdapter<Cards> {
 
     Context context;
+    String name;
 
     public ArrayAdapterCards(Context context, int resourceId , List<Cards> items) {
       super(context,resourceId,items);
