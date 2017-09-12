@@ -2,14 +2,11 @@ package com.example.naormalka.naordating2;
 
 import java.io.Serializable;
 
-/**
- * Created by eric.bell on 8/31/2017.
- */
 
-public class AppUserByEmail  implements Serializable {
+public class AppUserByEmail implements Serializable {
     private String displayName;
     private String uid;
-    private String profileImage ="https://d26btdus0guqxg.cloudfront.net/assets/no-profile-image-68ac03754ec47c2c54e94935f62feceb.png";
+    private String profileImage = "http://eadb.org/wp-content/uploads/2015/08/profile-placeholder.jpg";
     private String gender;
 
     public AppUserByEmail() {
@@ -66,6 +63,5 @@ public class AppUserByEmail  implements Serializable {
                 ", gender='" + gender + '\'' +
                 '}';
     }
-
-
 }
+

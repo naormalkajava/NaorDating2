@@ -1,32 +1,33 @@
 package com.example.naormalka.naordating2;
 
-
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.Serializable;
 
 
-/**
- * Created by user on 7/23/2017.
- */
-
 public class AppUser implements Serializable {
     private String displayName;
     private String uid;
-    private String profileImage ="https://d26btdus0guqxg.cloudfront.net/assets/no-profile-image-68ac03754ec47c2c54e94935f62feceb.png";
-    private String gender;
-//for firebase
+    private String profileImage = "https://d26btdus0guqxg.cloudfront.net/assets/no-profile-image-68ac03754ec47c2c54e94935f62feceb.png";
+    private String gender = null;
+
+    //for firebase
     public AppUser() {
     }
 //constractour
 
 
-    public AppUser(FirebaseUser user ,String gender) {
+    public AppUser(FirebaseUser user, String gender) {
         this.displayName = user.getDisplayName();
         this.uid = user.getUid();
         this.gender = gender;
-        if (user.getPhotoUrl() != null)
-        this.profileImage = user.getPhotoUrl().toString();
+        if (user.getPhotoUrl() != null) {
+            this.profileImage = user.getPhotoUrl().toString();
+        }
+
+    }
+
+    public AppUser(FirebaseUser user) {
 
     }
 
@@ -71,7 +72,6 @@ public class AppUser implements Serializable {
                 ", gender='" + gender + '\'' +
                 '}';
     }
-
 
 
 }

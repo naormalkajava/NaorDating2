@@ -6,7 +6,7 @@
 
     <string name="action_settings">Settings</string>
 
-    <string name="facebook_app_id">114248525952262</string>
-    <string name="fb_login_protocol_scheme">fb114248525952262</string>
-    <string name="facebook_application_id" translatable="false">114248525952262</string>
+    <string name="facebook_app_id">262156060959540</string>
+    <string name="fb_login_protocol_scheme">fb262156060959540</string>
+    <string name="facebook_application_id" translatable="false">262156060959540</string>
 </resources>

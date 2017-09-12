@@ -1,35 +1,43 @@
 {
   "project_info": {
-    "project_number": "542840865157",
-    "firebase_url": "https://naordating2-a847a.firebaseio.com",
-    "project_id": "naordating2-a847a",
-    "storage_bucket": "naordating2-a847a.appspot.com"
+    "project_number": "765468083497",
+    "firebase_url": "https://naordating2.firebaseio.com",
+    "project_id": "naordating2",
+    "storage_bucket": "naordating2.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:542840865157:android:fc6c3f72571fae1e",
+        "mobilesdk_app_id": "1:765468083497:android:fc6c3f72571fae1e",
         "android_client_info": {
           "package_name": "com.example.naormalka.naordating2"
         }
       },
       "oauth_client": [
         {
-          "client_id": "542840865157-ok5hegg4qq5d2tgk84bfrg93coijtkjc.apps.googleusercontent.com",
+          "client_id": "765468083497-jn0s5bt67o8dm6mdu2ca65o3s8ct744k.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.naormalka.naordating2",
-            "certificate_hash": "7611c846876dcd72b67b5964df8721931126dc94"
+            "certificate_hash": "be760f8f6de00e8f124bee2d4ae3bf848011729c"
           }
         },
         {
-          "client_id": "542840865157-lods6versfkmsdukogiisi7kkqdkh00p.apps.googleusercontent.com",
+          "client_id": "765468083497-salhgc5bdlg038j986tv9q4qt5sj88pc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.naormalka.naordating2",
+            "certificate_hash": "90acf71dec94858f51c94babd7503619e400b63e"
+          }
+        },
+        {
+          "client_id": "765468083497-0l0140bdh2aoo8f5qgvab9dddai39gm3.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC8GfhRua_cGiSbCWgRoLiHAk_nvq596t0"
+          "current_key": "AIzaSyA-31w2G_IJOchVD0S9THYzfX1u291BEwA"
         }
       ],
       "services": {
@@ -40,7 +48,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "542840865157-lods6versfkmsdukogiisi7kkqdkh00p.apps.googleusercontent.com",
+              "client_id": "765468083497-0l0140bdh2aoo8f5qgvab9dddai39gm3.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

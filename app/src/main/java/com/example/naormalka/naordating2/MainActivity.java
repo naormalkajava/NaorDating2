@@ -3,44 +3,43 @@ package com.example.naormalka.naordating2;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.disklrucache.DiskLruCache;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.jar.JarException;
+import java.util.Calendar;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity
@@ -49,15 +48,47 @@ public class MainActivity extends AppCompatActivity
 
     ImageView ivProfile;
     TextView etProfile;
-    TextView tvfriends;
+
+
+    private String userSex;
+    private String oppisteUser;
+
+    ListView listView;
+    List<Cards> rowItems;
+
+
+    SharedPreferences.Editor editor;
 
 
     Button btnLogOut;
     SwipeFlingAdapterView flingContainer;
-    ArrayList<String> al;
-    ArrayAdapter arrayAdapter;
+    private Cards cards_data[];
+    ArrayAdapterCards arrayAdapterCards;
     FirebaseAuth mAuth;
     SharedPreferences pref;
+
+    void sha1() {
+        try {
+
+
+            PackageInfo info = getPackageManager().getPackageInfo("com.example.naormalka.naordating2", PackageManager.GET_SIGNATURES);
+            for (android.content.pm.Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sha1();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +97,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mAuth = FirebaseAuth.getInstance();
-
 
 
 //btn click register
@@ -82,8 +112,6 @@ public class MainActivity extends AppCompatActivity
         btnLogOut.setOnClickListener(this);
 
 
-
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -91,17 +119,12 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
 
-
-
-
-
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         View hView = navigationView.getHeaderView(0);
         ivProfile = (ImageView) hView.findViewById(R.id.profile);
         etProfile = (TextView) hView.findViewById(R.id.etProfile);
-        tvfriends = (TextView) hView.findViewById(R.id.tvfriends);
+
         etProfile.setText(currentUser.getDisplayName());
         if (currentUser.getPhotoUrl() != null) {
             Glide.with(this).load(currentUser.getPhotoUrl().toString()).into(ivProfile);
@@ -109,27 +132,46 @@ public class MainActivity extends AppCompatActivity
 
         SwipeCard();
     }
+    // private String getAge(int year, int month, int day){
+    //     Calendar dob = Calendar.getInstance();
+    //     Calendar today = Calendar.getInstance();
+//
+    //     dob.set(year, month, day);
+//
+    //     int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
+//
+    //     if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)){
+    //         age--;
+    //     }
+//
+    //     Integer ageInt = new Integer(age);
+    //     String ageS = ageInt.toString();
+//
+    //     return ageS;
+    // }
+
 
     private void SwipeCard() {
 
-        al = new ArrayList<String>();
-        al.add("php");
-        al.add("c");
-        al.add("python");
-        al.add("java");
+        rowItems = new ArrayList<Cards>();
+        checkUserSex();
+
 
         //choose your favorite adapter
-        arrayAdapter = new ArrayAdapter<>(this, R.layout.item, R.id.helloText, al);
+        arrayAdapterCards = new ArrayAdapterCards(this, R.layout.item, rowItems);
+
+
         flingContainer = (SwipeFlingAdapterView) findViewById(R.id.frame);
+
         //set the listener and the adapter
-        flingContainer.setAdapter(arrayAdapter);
+        flingContainer.setAdapter(arrayAdapterCards);
         flingContainer.setFlingListener(new SwipeFlingAdapterView.onFlingListener() {
             @Override
             public void removeFirstObjectInAdapter() {
                 // this is the simplest way to delete an object from the Adapter (/AdapterView)
                 Log.d("LIST", "removed object!");
-                al.remove(0);
-                arrayAdapter.notifyDataSetChanged();
+                rowItems.remove(0);
+                arrayAdapterCards.notifyDataSetChanged();
             }
 
 
@@ -228,6 +270,139 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+    public void checkUserSex() {
+
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+        DatabaseReference maleDB = FirebaseDatabase.getInstance().getReference().child("Users").child("male");
+        maleDB.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if (dataSnapshot.getKey().equals(currentUser.getUid())) {
+                    userSex = "male";
+                    oppisteUser = "female";
+                    getOppositeSexUSer();
+
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+
+        // female DataBase
+
+
+        DatabaseReference femaleDB = FirebaseDatabase.getInstance().getReference().child("Users").child("female");
+        femaleDB.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if (dataSnapshot.getKey().equals(currentUser.getUid())) {
+
+                    userSex = "female";
+                    oppisteUser = "male";
+                    getOppositeSexUSer();
+                }
+
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+    }
+
+    public void getOppositeSexUSer() {
+
+        final DatabaseReference oppositeDB = FirebaseDatabase.getInstance().getReference().child("Users").child(oppisteUser);
+
+        oppositeDB.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if (dataSnapshot.exists()) {
+
+                    String nameFromDataBase = getNameFromDataBase(dataSnapshot);
+                    String imageFromDataBase = getImageFromDataBase(dataSnapshot);
+                    DataSnapshot child = dataSnapshot.child(oppisteUser);
+                    String gender = child.getKey();
+                    if (gender.equals("female")){
+                        imageFromDataBase = "http://ccsdhonorchoir.com/wp-content/uploads/2016/07/profile-placeholder-female-0e75fd0a5e0ce06b1e5f2f51c4454552.png";
+                    }
+
+
+                    Cards item = new Cards(dataSnapshot.getKey(), nameFromDataBase, imageFromDataBase);
+                    rowItems.add(item);
+                    arrayAdapterCards.notifyDataSetChanged();
+
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+    }
+
+    private String getNameFromDataBase(DataSnapshot dataSnapshot) {
+        Object value = dataSnapshot.getValue();
+        String s1 = value.toString();
+        String s2 = s1.toString();
+        String replace = s2.replace("{", "");
+        String data = s1.replaceAll("\\=.*?\\}", "");
+        String name = data.replace("{", "").replace("}", "");
+        return name;
+    }
+
+    private String getImageFromDataBase(DataSnapshot dataSnapshot) {
+        String s1 = dataSnapshot.getValue().toString();
+        String s2 = s1.replaceAll("\\=.*?\\,", "");
+        String s3 = s2.replaceAll("\\{.*?\\=", "");
+        String replace = s3.replace("}}", "");
+        return replace;
     }
 
     @Override
