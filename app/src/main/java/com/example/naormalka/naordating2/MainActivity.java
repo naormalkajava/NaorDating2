@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -33,12 +32,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 
@@ -52,6 +51,8 @@ public class MainActivity extends AppCompatActivity
 
     private String userSex;
     private String oppisteUser;
+    private  DatabaseReference userDb;
+    private String currentUId;
 
     ListView listView;
     List<Cards> rowItems;
@@ -94,6 +95,10 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        userDb = FirebaseDatabase.getInstance().getReference().child("Users");
+
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mAuth = FirebaseAuth.getInstance();
@@ -177,14 +182,24 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onLeftCardExit(Object dataObject) {
-                //Do something on the left!
-                //You also have access to the original object.
-                //If you want to use it just cast it (String) dataObject
+                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                Cards obj = (Cards) dataObject;
+                String userId = obj.getUserId();
+                String name = obj.getName();
+               // userDb.child(oppisteUser).child(userId).child("connections").child("nope").child(currentUser.getUid()).setValue(true);
+                userDb.child(oppisteUser).child(userId).child("connections").child("nope").child(currentUser.getUid()).setValue(true);
                 Toast.makeText(MainActivity.this, "Left!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onRightCardExit(Object dataObject) {
+                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                Cards obj = (Cards) dataObject;
+                String userId = obj.getUserId();
+                String name = obj.getName();
+             //   userDb.child(oppisteUser).child(userId).child("connections").child("yeps").child(currentUser.getUid()).setValue(true);
+                userDb.child(oppisteUser).child(userId).child("connections").child("yeps").child(currentUser.getUid()).setValue(true);
+              isConnectionMatch(userId);
                 Toast.makeText(MainActivity.this, "Right!", Toast.LENGTH_SHORT).show();
             }
 
@@ -210,9 +225,34 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    private void isConnectionMatch(String userId) {
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        final DatabaseReference userDb = FirebaseDatabase.getInstance().getReference("Users");
+
+        DatabaseReference currectuserConnectionDB = userDb.child(userSex).child(currentUser.getUid()).child("connections").child("yeps").child(userId);
+            currectuserConnectionDB.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()){
+
+                        Toast.makeText(MainActivity.this, "new Connection", Toast.LENGTH_LONG).show();
+                        userDb.child(oppisteUser).child(dataSnapshot.getKey()).child("connections").child("matches").child(currentUser.getUid()).setValue(true);
+                        userDb.child(userSex).child(currentUser.getUid()).child("connections").child("matches").child(dataSnapshot.getKey()).setValue(true);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+    }
+
 
     private void GoToLoginActivity() {
-        Intent intent = new Intent(this, LoginActivity.class);
+        Intent intent = new Intent(this, ChooseLoginRegistrationActivity.class);
         startActivity(intent);
     }
 
@@ -350,21 +390,11 @@ public class MainActivity extends AppCompatActivity
         oppositeDB.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if (dataSnapshot.exists()) {
-
-                    String nameFromDataBase = getNameFromDataBase(dataSnapshot);
-                    String imageFromDataBase = getImageFromDataBase(dataSnapshot);
-                    DataSnapshot child = dataSnapshot.child(oppisteUser);
-                    String gender = child.getKey();
-                    if (gender.equals("female")){
-                        imageFromDataBase = "http://ccsdhonorchoir.com/wp-content/uploads/2016/07/profile-placeholder-female-0e75fd0a5e0ce06b1e5f2f51c4454552.png";
-                    }
-
-
-                    Cards item = new Cards(dataSnapshot.getKey(), nameFromDataBase, imageFromDataBase);
+                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                if (dataSnapshot.exists() && !dataSnapshot.child("connections").child("nope").hasChild(currentUser.getUid()) && !dataSnapshot.child("connections").child("yeps").hasChild(currentUser.getUid()))  {
+                    Cards item = new Cards(dataSnapshot.getKey(),dataSnapshot.child("name").getValue().toString(),null);
                     rowItems.add(item);
                     arrayAdapterCards.notifyDataSetChanged();
-
                 }
             }
 
@@ -393,7 +423,7 @@ public class MainActivity extends AppCompatActivity
         String s2 = s1.toString();
         String replace = s2.replace("{", "");
         String data = s1.replaceAll("\\=.*?\\}", "");
-        String name = data.replace("{", "").replace("}", "");
+        String name = data.replace("{", "").replace("}", "").replace("connections," , "");
         return name;
     }
 
@@ -409,7 +439,8 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View view) {
         mAuth.signOut();
         LoginManager.getInstance().logOut();
-        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+
+        Intent intent = new Intent(MainActivity.this, ChooseLoginRegistrationActivity.class);
         startActivity(intent);
         finish();
         return;
