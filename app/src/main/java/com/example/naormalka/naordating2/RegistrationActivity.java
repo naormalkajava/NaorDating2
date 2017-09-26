@@ -7,12 +7,14 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -41,14 +43,14 @@ public class RegistrationActivity extends AppCompatActivity {
     public static final String TAG = "naor";
 
 
-    CallbackManager callbackManager;
-    LoginButton faceButton;
+    //  CallbackManager callbackManager;
+    //  LoginButton faceButton;
     private FirebaseAuth.AuthStateListener firebaseAuthStateListener;
 
     FirebaseAuth mAuth;
     String birthday = "";
-    String gender = "";
-    Button btnRegister;
+    //  String gender = "";
+    BootstrapButton btnRegister;
     EditText etName;
     EditText etemail;
     EditText etPassword;
@@ -75,13 +77,14 @@ public class RegistrationActivity extends AppCompatActivity {
                     progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                     progress.show();
                     Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
+                    intent.putExtra("name",getName());
                     startActivity(intent);
                     finish();
                     return;
                 }
             }
         };
-        btnRegister = (Button) findViewById(R.id.register);
+        btnRegister = (BootstrapButton) findViewById(R.id.register);
         mRadioGroup = (RadioGroup) findViewById(R.id.radioGroup);
 
         etemail = (EditText) findViewById(R.id.email);
@@ -125,60 +128,61 @@ public class RegistrationActivity extends AppCompatActivity {
                 });
             }
         });
-
-        //
-        callbackManager = CallbackManager.Factory.create();
-        faceButton = (LoginButton) findViewById(R.id.faceButton);
-        faceButton.setReadPermissions(Arrays.asList(
-                "public_profile", "email", "user_birthday", "user_friends"));
-        faceButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-
-                Log.d(TAG, "facebook:onSuccess:" + loginResult);
-                handleFacebookAccessToken(loginResult.getAccessToken());
-                AccessToken accessToken = loginResult.getAccessToken();
-                GraphRequest request = GraphRequest.newMeRequest(
-                        loginResult.getAccessToken(),
-                        new GraphRequest.GraphJSONObjectCallback() {
-                            @Override
-                            public void onCompleted(JSONObject object, GraphResponse response) {
-                                Log.v("RegistrationActivity", response.toString());
-
-
-                                try {
-
-                                    gender = object.getString("gender");
-                                    birthday = object.getString("birthday");
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-                        });
-
-                Bundle parameters = new Bundle();
-                parameters.putString("fields", "id,name,birthday,gender");
-                request.setParameters(parameters);
-                request.executeAsync();
-            }
-
-            @Override
-            public void onCancel() {
-                Log.d(TAG, "facebook:onCancel");
-
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                Log.d(TAG, "facebook:onError", error);
-
-            }
-        });
-
     }
+
+    //
+    //callbackManager = CallbackManager.Factory.create();
+    //faceButton = (LoginButton) findViewById(R.id.faceButton);
+    //faceButton.setReadPermissions(Arrays.asList(
+    //        "public_profile", "email", "user_birthday", "user_friends"));
+    //faceButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+
+    //    @Override
+    //    public void onSuccess(LoginResult loginResult) {
+
+    //        Log.d(TAG, "facebook:onSuccess:" + loginResult);
+    //        handleFacebookAccessToken(loginResult.getAccessToken());
+    //        AccessToken accessToken = loginResult.getAccessToken();
+    //        GraphRequest request = GraphRequest.newMeRequest(
+    //                loginResult.getAccessToken(),
+    //                new GraphRequest.GraphJSONObjectCallback() {
+    //                    @Override
+    //                    public void onCompleted(JSONObject object, GraphResponse response) {
+    //                        Log.v("RegistrationActivity", response.toString());
+
+
+    //                        try {
+
+    //                            gender = object.getString("gender");
+    //                            birthday = object.getString("birthday");
+
+    //                        } catch (JSONException e) {
+    //                            e.printStackTrace();
+    //                        }
+
+    //                    }
+    //                });
+
+    //        Bundle parameters = new Bundle();
+    //        parameters.putString("fields", "id,name,birthday,gender");
+    //        request.setParameters(parameters);
+    //        request.executeAsync();
+    //    }
+
+    //        @Override
+    //        public void onCancel() {
+    //            Log.d(TAG, "facebook:onCancel");
+
+    //        }
+
+    //        @Override
+    //        public void onError(FacebookException error) {
+    //            Log.d(TAG, "facebook:onError", error);
+
+    //        }
+    //    });
+
+    //}
 
     private String getEmail() {
         return etemail.getText().toString();
@@ -244,57 +248,54 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
 
-    private void handleFacebookAccessToken(AccessToken token) {
-        Log.d(TAG, "handleFacebookAccessToken:" + token);
+    //  private void handleFacebookAccessToken(AccessToken token) {
+    //    Log.d(TAG, "handleFacebookAccessToken:" + token);
 
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
-                            Toast.makeText(RegistrationActivity.this, "succed to firebase", Toast.LENGTH_SHORT).show();
-                            registerToFireBase();
+    //    AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+    //    mAuth.signInWithCredential(credential)
+    //            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+    //                @Override
+    //                public void onComplete(@NonNull Task<AuthResult> task) {
+    //                    if (task.isSuccessful()) {
+    //                        // Sign in success, update UI with the signed-in user's information
+    //                        Log.d(TAG, "signInWithCredential:success");
+    //                        Toast.makeText(RegistrationActivity.this, "succed to firebase", Toast.LENGTH_SHORT).show();
+    //                        registerToFireBase();
 
-                            gotoMainActivity();
+    //                        gotoMainActivity();
 
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(RegistrationActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+    //                    } else {
+    //                        // If sign in fails, display a message to the user.
+    //                        Log.w(TAG, "signInWithCredential:failure", task.getException());
+    //                        Toast.makeText(RegistrationActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
 
-                        }
+    //                    }
 
-                    }
-                });
-
-
-    }
-
-    private void registerToFireBase() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference userref = FirebaseDatabase.getInstance().getReference().child("Users").child(gender.toLowerCase()).child(currentUser.getUid()).child("name");
-        userref.setValue(currentUser.getDisplayName());
+    //                }
+    //            });
 
 
+    //}
 
-    }
+    //  private void registerToFireBase() {
+    //      FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    //      DatabaseReference userref = FirebaseDatabase.getInstance().getReference().child("Users").child(gender.toLowerCase()).child(currentUser.getUid()).child("name");
+    //      userref.setValue(currentUser.getDisplayName());
+    //  }
 
 
-    private void gotoMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-    }
+//   private void gotoMainActivity() {
+//       Intent intent = new Intent(this, MainActivity.class);
+//       startActivity(intent);
+//   }
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode, resultCode, data);
+//   @Override
+//   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//       super.onActivityResult(requestCode, resultCode, data);
+//       callbackManager.onActivityResult(requestCode, resultCode, data);
 
-    }
+//   }
 
     @Override
     protected void onStart() {
@@ -308,4 +309,12 @@ public class RegistrationActivity extends AppCompatActivity {
         mAuth.removeAuthStateListener(firebaseAuthStateListener);
     }
 
+
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(this,ChooseLoginRegistrationActivity.class);
+        startActivity(i);
+        finish();
+        return;
+    }
 }

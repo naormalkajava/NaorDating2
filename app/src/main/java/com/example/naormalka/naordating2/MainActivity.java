@@ -1,15 +1,21 @@
 package com.example.naormalka.naordating2;
 
 
+import android.app.Fragment;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
@@ -20,11 +26,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.beardedhen.androidbootstrap.BootstrapButton;
+import com.beardedhen.androidbootstrap.BootstrapCircleThumbnail;
 import com.bumptech.glide.Glide;
 import com.facebook.login.LoginManager;
+import com.facebook.places.internal.LocationPackageManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -40,33 +50,26 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.name;
+import static android.R.attr.value;
+
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
-
-    ImageView ivProfile;
-    TextView etProfile;
-
-
+    private ImageView ivProfile;
+    private TextView etProfile;
     private String userSex;
     private String oppisteUser;
-    private  DatabaseReference userDb;
-    private String currentUId;
-
-    ListView listView;
-    List<Cards> rowItems;
-
-
-    SharedPreferences.Editor editor;
-
-
-    Button btnLogOut;
-    SwipeFlingAdapterView flingContainer;
-    private Cards cards_data[];
-    ArrayAdapterCards arrayAdapterCards;
-    FirebaseAuth mAuth;
-    SharedPreferences pref;
+    private DatabaseReference userDb;
+    private List<Cards> rowItems;
+    private SwipeFlingAdapterView flingContainer;
+    private ArrayAdapterCards arrayAdapterCards;
+    private FirebaseAuth mAuth;
+    private BootstrapCircleThumbnail like;
+    private BootstrapCircleThumbnail dislike;
+    private View.OnClickListener likeclickListener;
+    private String currectUserGender = null;
 
     void sha1() {
         try {
@@ -89,12 +92,24 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         sha1();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        like = (BootstrapCircleThumbnail) findViewById(R.id.like);
+
+        dislike = (BootstrapCircleThumbnail) findViewById(R.id.dislike);
+
 
         userDb = FirebaseDatabase.getInstance().getReference().child("Users");
 
@@ -113,28 +128,25 @@ public class MainActivity extends AppCompatActivity
         }
 
 
-        btnLogOut = (Button) findViewById(R.id.btnlogOut);
-        btnLogOut.setOnClickListener(this);
-
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         View hView = navigationView.getHeaderView(0);
+
         ivProfile = (ImageView) hView.findViewById(R.id.profile);
         etProfile = (TextView) hView.findViewById(R.id.etProfile);
 
-        etProfile.setText(currentUser.getDisplayName());
+
+
+
         if (currentUser.getPhotoUrl() != null) {
             Glide.with(this).load(currentUser.getPhotoUrl().toString()).into(ivProfile);
         }
-
         SwipeCard();
     }
     // private String getAge(int year, int month, int day){
@@ -179,28 +191,19 @@ public class MainActivity extends AppCompatActivity
                 arrayAdapterCards.notifyDataSetChanged();
             }
 
-
             @Override
             public void onLeftCardExit(Object dataObject) {
                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                 Cards obj = (Cards) dataObject;
                 String userId = obj.getUserId();
                 String name = obj.getName();
-               // userDb.child(oppisteUser).child(userId).child("connections").child("nope").child(currentUser.getUid()).setValue(true);
                 userDb.child(oppisteUser).child(userId).child("connections").child("nope").child(currentUser.getUid()).setValue(true);
                 Toast.makeText(MainActivity.this, "Left!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onRightCardExit(Object dataObject) {
-                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                Cards obj = (Cards) dataObject;
-                String userId = obj.getUserId();
-                String name = obj.getName();
-             //   userDb.child(oppisteUser).child(userId).child("connections").child("yeps").child(currentUser.getUid()).setValue(true);
-                userDb.child(oppisteUser).child(userId).child("connections").child("yeps").child(currentUser.getUid()).setValue(true);
-              isConnectionMatch(userId);
-                Toast.makeText(MainActivity.this, "Right!", Toast.LENGTH_SHORT).show();
+                RightCardExit(dataObject);
             }
 
             @Override
@@ -230,23 +233,28 @@ public class MainActivity extends AppCompatActivity
 
         final DatabaseReference userDb = FirebaseDatabase.getInstance().getReference("Users");
 
-        DatabaseReference currectuserConnectionDB = userDb.child(userSex).child(currentUser.getUid()).child("connections").child("yeps").child(userId);
-            currectuserConnectionDB.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()){
-
-                        Toast.makeText(MainActivity.this, "new Connection", Toast.LENGTH_LONG).show();
-                        userDb.child(oppisteUser).child(dataSnapshot.getKey()).child("connections").child("matches").child(currentUser.getUid()).setValue(true);
-                        userDb.child(userSex).child(currentUser.getUid()).child("connections").child("matches").child(dataSnapshot.getKey()).setValue(true);
-                    }
+        final DatabaseReference currectuserConnectionDB = userDb.child(userSex).child(currentUser.getUid()).child("connections").child("yeps").child(userId);
+        currectuserConnectionDB.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Toast.makeText(MainActivity.this, "new Connection", Toast.LENGTH_LONG).show();
+                    userDb.child(oppisteUser).child(dataSnapshot.getKey()).child("connections").child("matches").child(currentUser.getUid()).setValue(true);
+                    userDb.child(userSex).child(currentUser.getUid()).child("connections").child("matches").child(dataSnapshot.getKey()).setValue(true);
+                    FragmentManager fm = getSupportFragmentManager();
+                    Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    v.vibrate(500);
+                    NewMatchFragment dialog = new NewMatchFragment();
+                    dialog.show(fm,"dialog");
+                   
                 }
+            }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-                }
-            });
+            }
+        });
 
     }
 
@@ -281,7 +289,12 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
+            mAuth.signOut();
+            LoginManager.getInstance().logOut();
+            Intent intent = new Intent(MainActivity.this, ChooseLoginRegistrationActivity.class);
+            startActivity(intent);
+            finish();
             return true;
         }
 
@@ -326,6 +339,7 @@ public class MainActivity extends AppCompatActivity
                     oppisteUser = "female";
                     getOppositeSexUSer();
 
+
                 }
             }
 
@@ -355,13 +369,11 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot.getKey().equals(currentUser.getUid())) {
-
                     userSex = "female";
                     oppisteUser = "male";
                     getOppositeSexUSer();
+
                 }
-
-
             }
 
             @Override
@@ -380,21 +392,21 @@ public class MainActivity extends AppCompatActivity
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-
     }
 
     public void getOppositeSexUSer() {
-
         final DatabaseReference oppositeDB = FirebaseDatabase.getInstance().getReference().child("Users").child(oppisteUser);
 
         oppositeDB.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                if (dataSnapshot.exists() && !dataSnapshot.child("connections").child("nope").hasChild(currentUser.getUid()) && !dataSnapshot.child("connections").child("yeps").hasChild(currentUser.getUid()))  {
-                    Cards item = new Cards(dataSnapshot.getKey(),dataSnapshot.child("name").getValue().toString(),null);
+                if (dataSnapshot.exists() && !dataSnapshot.child("connections").child("nope").hasChild(currentUser.getUid()) && !dataSnapshot.child("connections").child("yeps").hasChild(currentUser.getUid())) {
+                    Cards item = new Cards(dataSnapshot.getKey(), dataSnapshot.child("name").getValue().toString(), null);
                     rowItems.add(item);
                     arrayAdapterCards.notifyDataSetChanged();
+
+
                 }
             }
 
@@ -414,7 +426,6 @@ public class MainActivity extends AppCompatActivity
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-
     }
 
     private String getNameFromDataBase(DataSnapshot dataSnapshot) {
@@ -423,11 +434,11 @@ public class MainActivity extends AppCompatActivity
         String s2 = s1.toString();
         String replace = s2.replace("{", "");
         String data = s1.replaceAll("\\=.*?\\}", "");
-        String name = data.replace("{", "").replace("}", "").replace("connections," , "");
+        String name = data.replace("{", "").replace("}", "").replace("connections,", "");
         return name;
     }
 
-    private String getImageFromDataBase(DataSnapshot dataSnapshot) {
+    private String getImageFro11mDataBase(DataSnapshot dataSnapshot) {
         String s1 = dataSnapshot.getValue().toString();
         String s2 = s1.replaceAll("\\=.*?\\,", "");
         String s3 = s2.replaceAll("\\{.*?\\=", "");
@@ -435,15 +446,14 @@ public class MainActivity extends AppCompatActivity
         return replace;
     }
 
-    @Override
-    public void onClick(View view) {
-        mAuth.signOut();
-        LoginManager.getInstance().logOut();
-
-        Intent intent = new Intent(MainActivity.this, ChooseLoginRegistrationActivity.class);
-        startActivity(intent);
-        finish();
-        return;
+    private void RightCardExit(Object dataObject) {
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        final Cards obj = (Cards) dataObject;
+        final String userId = obj.getUserId();
+        String name = obj.getName();
+        userDb.child(oppisteUser).child(userId).child("connections").child("yeps").child(currentUser.getUid()).setValue(true);
+        isConnectionMatch(userId);
+        Toast.makeText(MainActivity.this, "Right!", Toast.LENGTH_SHORT).show();
     }
 
 

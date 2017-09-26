@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.beardedhen.androidbootstrap.TypefaceProvider;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -21,7 +22,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private Button mLogin;
+    private BootstrapButton mLogin;
     private ProgressBar progreesb;
     private EditText mEmail, mPassword;
     ProgressDialog progress;
@@ -58,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         };
 
 
-        mLogin = (Button) findViewById(R.id.login);
+        mLogin = (BootstrapButton) findViewById(R.id.login);
 
         mEmail = (EditText) findViewById(R.id.email);
         mPassword = (EditText) findViewById(R.id.password);
@@ -66,6 +67,8 @@ public class LoginActivity extends AppCompatActivity {
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if (!isEmailValid() | ! isPasswordValid()) return;
 
                 final String email = mEmail.getText().toString();
                 final String password = mPassword.getText().toString();
@@ -83,6 +86,40 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private String getEmail () {
+        return mEmail.getText().toString();
+    }
+    private String getPassword () {
+        return mPassword.getText().toString();
+    }
+
+    private boolean isEmailValid() {
+        boolean iscurrectMail;
+
+        if (getEmail().length() > 6 && getEmail().contains("@") && (getEmail().contains("co.il") || getEmail().contains("com")))//...
+        {
+            iscurrectMail = true;
+
+        } else {
+            iscurrectMail = false;
+            mEmail.setError("Invalid email address.");
+
+        }
+
+        return iscurrectMail;
+    }
+    private boolean isPasswordValid() {
+        boolean iscurrectMail;
+
+        if (getPassword().length() < 5) {
+            mPassword.setError("You Must At Least 6 charcters");
+            iscurrectMail = false;
+        } else {
+            iscurrectMail = true;
+        }
+        return iscurrectMail;
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -93,5 +130,12 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         mAuth.removeAuthStateListener(firebaseAuthStateListener);
+    }
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(this,ChooseLoginRegistrationActivity.class);
+        startActivity(i);
+        finish();
+        return;
     }
 }
