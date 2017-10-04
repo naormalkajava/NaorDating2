@@ -70,12 +70,12 @@ public class RegistrationActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if (user != null) {
-                    progress = new ProgressDialog(RegistrationActivity.this);
-                    progress.setTitle("Please Wait");
-                    progress.setMessage("Wait");
-                    progress.setCancelable(true);
-                    progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    progress.show();
+               //  progress = new ProgressDialog(RegistrationActivity.this);
+               //  progress.setTitle("Please Wait");
+               //  progress.setMessage("Wait");
+               //  progress.setCancelable(true);
+               //  progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+               //  progress.show();
                     Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
                     intent.putExtra("name",getName());
                     startActivity(intent);

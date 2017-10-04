@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.design.widget.NavigationView;
@@ -44,10 +45,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
+import com.squareup.picasso.Picasso;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.R.attr.name;
@@ -107,9 +110,26 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         like = (BootstrapCircleThumbnail) findViewById(R.id.like);
+        like.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                flingContainer.getTopCardListener().selectRight();
+                flingContainer.getTopCardListener().setRotationDegrees(60f);
+
+            }
+        });
+
 
         dislike = (BootstrapCircleThumbnail) findViewById(R.id.dislike);
+        dislike.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
+                flingContainer.getTopCardListener().selectLeft();
+                flingContainer.getTopCardListener().setRotationDegrees(60f);
+
+            }
+        });
 
         userDb = FirebaseDatabase.getInstance().getReference().child("Users");
 
@@ -144,9 +164,6 @@ public class MainActivity extends AppCompatActivity
 
 
 
-        if (currentUser.getPhotoUrl() != null) {
-            Glide.with(this).load(currentUser.getPhotoUrl().toString()).into(ivProfile);
-        }
         SwipeCard();
     }
     // private String getAge(int year, int month, int day){
@@ -245,8 +262,8 @@ public class MainActivity extends AppCompatActivity
                     Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                     v.vibrate(500);
                     NewMatchFragment dialog = new NewMatchFragment();
-                    dialog.show(fm,"dialog");
-                   
+                    dialog.show(fm, "dialog");
+
                 }
             }
 
@@ -293,6 +310,13 @@ public class MainActivity extends AppCompatActivity
             mAuth.signOut();
             LoginManager.getInstance().logOut();
             Intent intent = new Intent(MainActivity.this, ChooseLoginRegistrationActivity.class);
+            startActivity(intent);
+            finish();
+            return true;
+        }
+        if (id == R.id.action_SettingUser) {
+            Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+            intent.putExtra("userSex", userSex);
             startActivity(intent);
             finish();
             return true;
