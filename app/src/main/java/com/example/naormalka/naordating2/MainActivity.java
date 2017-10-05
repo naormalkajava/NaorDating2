@@ -44,6 +44,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.lorentzos.flingswipe.FlingCardListener;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 import com.squareup.picasso.Picasso;
 
@@ -113,6 +114,9 @@ public class MainActivity extends AppCompatActivity
         like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+               if ( rowItems.isEmpty()) return;
+
                 flingContainer.getTopCardListener().selectRight();
                 flingContainer.getTopCardListener().setRotationDegrees(60f);
 
@@ -124,7 +128,7 @@ public class MainActivity extends AppCompatActivity
         dislike.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if ( rowItems.isEmpty()) return;
                 flingContainer.getTopCardListener().selectLeft();
                 flingContainer.getTopCardListener().setRotationDegrees(60f);
 
