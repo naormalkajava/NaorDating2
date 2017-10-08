@@ -1,6 +1,8 @@
 package com.example.naormalka.naordating2;
 
 
+import android.*;
+import android.Manifest;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -11,7 +13,9 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -34,10 +38,12 @@ import android.widget.Toast;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.beardedhen.androidbootstrap.BootstrapCircleThumbnail;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.disklrucache.DiskLruCache;
 import com.facebook.login.LoginManager;
 import com.facebook.places.internal.LocationPackageManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -48,20 +54,29 @@ import com.lorentzos.flingswipe.FlingCardListener;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 import com.squareup.picasso.Picasso;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.R.attr.name;
 import static android.R.attr.value;
+import static com.example.naormalka.naordating2.R.id.phone;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private ImageView ivProfile;
+  //  private ProgressBar circular_bar;
     private TextView etProfile;
     private String userSex;
     private String oppisteUser;
@@ -72,8 +87,9 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAuth mAuth;
     private BootstrapCircleThumbnail like;
     private BootstrapCircleThumbnail dislike;
-    private View.OnClickListener likeclickListener;
-    private String currectUserGender = null;
+    FileOutputStream fos = null;
+    FileOutputStream fosUSerNAme = null;
+    DatabaseReference databaseReference;
 
     void sha1() {
         try {
@@ -97,11 +113,14 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         sha1();
 
+
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+
 
     }
 
@@ -109,26 +128,38 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+     //  circular_bar = (ProgressBar) findViewById(R.id.circular_bar);
+
+     //  if (rowItems != null) {
+     //      if (!rowItems.isEmpty()) {
+     //          circular_bar.setVisibility(View.VISIBLE);
+     //      }
+     //      else
+     //      {
+     //          circular_bar.setVisibility(View.GONE);
+     //      }
+     //  }
+
+
+
+
 
         like = (BootstrapCircleThumbnail) findViewById(R.id.like);
         like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-               if ( rowItems.isEmpty()) return;
+                if (rowItems.isEmpty()) return;
 
                 flingContainer.getTopCardListener().selectRight();
                 flingContainer.getTopCardListener().setRotationDegrees(60f);
-
             }
         });
-
-
         dislike = (BootstrapCircleThumbnail) findViewById(R.id.dislike);
         dislike.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if ( rowItems.isEmpty()) return;
+                if (rowItems.isEmpty()) return;
                 flingContainer.getTopCardListener().selectLeft();
                 flingContainer.getTopCardListener().setRotationDegrees(60f);
 
@@ -136,7 +167,6 @@ public class MainActivity extends AppCompatActivity
         });
 
         userDb = FirebaseDatabase.getInstance().getReference().child("Users");
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -151,6 +181,32 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
+        requestStorgePermission();
+        Intent intent = getIntent();
+        Bundle intentBundle = intent.getExtras();
+        if (intentBundle != null) {
+            if (intentBundle.containsKey("gender")) {
+                String gender = intent.getExtras().getString("gender");
+                try {
+                    fos = openFileOutput("gender", Context.MODE_PRIVATE);
+                    fos.write(gender.getBytes());
+                    fos.close();
+                } catch (IOException e) {
+                    e.getMessage();
+                }
+            }
+            if (intentBundle.containsKey("userName")) {
+                String userName = intent.getExtras().getString("userName");
+                try {
+                    fosUSerNAme = openFileOutput("userName", Context.MODE_PRIVATE);
+                    fosUSerNAme.write(userName.getBytes());
+                    fosUSerNAme.close();
+                } catch (IOException e) {
+
+                }
+            }
+
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -164,29 +220,30 @@ public class MainActivity extends AppCompatActivity
 
         ivProfile = (ImageView) hView.findViewById(R.id.profile);
         etProfile = (TextView) hView.findViewById(R.id.etProfile);
-
-
-
-
+        String userName = readUserName();
+        String gender = readGender();
+        String s = currentUser.getProviders().get(0);
+        if (s.contains("facebook.com")) {
+            etProfile.setText(currentUser.getDisplayName());
+        }
+        else
+        {
+            etProfile.setText(userName);
+        }
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
         SwipeCard();
     }
-    // private String getAge(int year, int month, int day){
-    //     Calendar dob = Calendar.getInstance();
-    //     Calendar today = Calendar.getInstance();
-//
-    //     dob.set(year, month, day);
-//
-    //     int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
-//
-    //     if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)){
-    //         age--;
-    //     }
-//
-    //     Integer ageInt = new Integer(age);
-    //     String ageS = ageInt.toString();
-//
-    //     return ageS;
-    // }
+
+    private void requestStorgePermission() {
+        try {
+            if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, SettingActivity.PICK_FROM_GALLERY);
+            }
+        } catch (Exception e) {
+            e.getMessage();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
 
 
     private void SwipeCard() {
@@ -229,6 +286,9 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
+
+
+
                 // Ask for more data here
 
             }
@@ -278,7 +338,6 @@ public class MainActivity extends AppCompatActivity
         });
 
     }
-
 
     private void GoToLoginActivity() {
         Intent intent = new Intent(this, ChooseLoginRegistrationActivity.class);
@@ -391,7 +450,6 @@ public class MainActivity extends AppCompatActivity
 
         // female DataBase
 
-
         DatabaseReference femaleDB = FirebaseDatabase.getInstance().getReference().child("Users").child("female");
         femaleDB.addChildEventListener(new ChildEventListener() {
             @Override
@@ -430,11 +488,13 @@ public class MainActivity extends AppCompatActivity
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                 if (dataSnapshot.exists() && !dataSnapshot.child("connections").child("nope").hasChild(currentUser.getUid()) && !dataSnapshot.child("connections").child("yeps").hasChild(currentUser.getUid())) {
-                    Cards item = new Cards(dataSnapshot.getKey(), dataSnapshot.child("name").getValue().toString(), null);
+                    String imageUrl = null;
+                    if (dataSnapshot.child("profileImageUrl").exists()) {
+                       imageUrl = dataSnapshot.child("profileImageUrl").toString();
+                    }
+                    Cards item = new Cards(dataSnapshot.getKey(), dataSnapshot.child("name").getValue().toString(), imageUrl);
                     rowItems.add(item);
                     arrayAdapterCards.notifyDataSetChanged();
-
-
                 }
             }
 
@@ -456,24 +516,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private String getNameFromDataBase(DataSnapshot dataSnapshot) {
-        Object value = dataSnapshot.getValue();
-        String s1 = value.toString();
-        String s2 = s1.toString();
-        String replace = s2.replace("{", "");
-        String data = s1.replaceAll("\\=.*?\\}", "");
-        String name = data.replace("{", "").replace("}", "").replace("connections,", "");
-        return name;
-    }
-
-    private String getImageFro11mDataBase(DataSnapshot dataSnapshot) {
-        String s1 = dataSnapshot.getValue().toString();
-        String s2 = s1.replaceAll("\\=.*?\\,", "");
-        String s3 = s2.replaceAll("\\{.*?\\=", "");
-        String replace = s3.replace("}}", "");
-        return replace;
-    }
-
     private void RightCardExit(Object dataObject) {
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         final Cards obj = (Cards) dataObject;
@@ -484,8 +526,46 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(MainActivity.this, "Right!", Toast.LENGTH_SHORT).show();
     }
 
+    private String readGender() {
+        FileInputStream in = null;
+        StringBuilder sb = null;
+        try {
+            in = openFileInput("gender");
+            InputStreamReader inputStreamReader = new InputStreamReader(in);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            sb = new StringBuilder();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (IOException e) {
+            e.getMessage();
+        } finally {
+            return sb.toString();
+        }
+    }
 
-//swipeView
+    private String readUserName() {
+        FileInputStream in = null;
+        StringBuilder sb = null;
+        try {
+            in = openFileInput("userName");
+            InputStreamReader inputStreamReader = new InputStreamReader(in);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            sb = new StringBuilder();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (IOException e) {
+            e.getMessage();
+        } finally {
+            return sb.toString();
+        }
+
+    }
+
+
 }
 
 

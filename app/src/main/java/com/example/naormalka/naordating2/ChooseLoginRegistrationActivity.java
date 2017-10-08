@@ -186,7 +186,7 @@ public class ChooseLoginRegistrationActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String displayName = currentUser.getDisplayName();
-        intent.putExtra("name",displayName);
+        intent.putExtra("userName",displayName);
         intent.putExtra("birthday",birthday);
         startActivity(intent);
     }

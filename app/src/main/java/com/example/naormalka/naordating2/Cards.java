@@ -9,16 +9,16 @@ import java.io.Serializable;
 public class Cards implements Serializable {
     private String userId;
     private String name;
-    private String imagesource = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
+    private String profileImageUrl = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
 
     public Cards() {
     }
 
-    public Cards(String userId, String name, String imagesource) {
+    public Cards(String userId, String name, String profileImageUrl) {
         this.userId = userId;
         this.name = name;
-        if (imagesource != null)
-        this.imagesource = imagesource;
+        if (profileImageUrl != null)
+        this.profileImageUrl = profileImageUrl;
     }
 
     public String getUserId() {
@@ -37,12 +37,12 @@ public class Cards implements Serializable {
         this.name = name;
     }
 
-    public String getImagesource() {
-        return imagesource;
+    public String getProfileImageUrl() {
+        return profileImageUrl;
     }
 
-    public void setImagesource(String imagesource) {
-        this.imagesource = imagesource;
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class Cards implements Serializable {
         return "Cards{" +
                 "userId='" + userId + '\'' +
                 ", name='" + name + '\'' +
-                ", imagesource='" + imagesource + '\'' +
+                ", imagesource='" + profileImageUrl + '\'' +
                 '}';
     }
 }

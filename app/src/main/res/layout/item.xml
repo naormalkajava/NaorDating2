@@ -33,47 +33,30 @@
         app:layout_constraintVertical_bias="0.0"
         app:layout_constraintHorizontal_bias="0.9">
 
-        <android.support.constraint.ConstraintLayout
-            android:layout_width="251dp"
-            android:layout_height="371dp"
-            android:layout_gravity="center">
+        <LinearLayout
+            android:layout_width="300dp"
+            android:layout_height="350dp"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/image23"
+                android:layout_height="300dp"
+                android:layout_width="match_parent"
+                android:scaleType="centerCrop"
+            />
 
             <TextView
                 android:id="@+id/name"
-                android:layout_width="97dp"
-                android:layout_height="48dp"
-                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="20sp"
+                android:textSize="30sp"
                 android:textColor="@android:color/black"
-                android:textSize="20sp"
-                tools:text="hello"
-                android:layout_marginRight="8dp"
-                app:layout_constraintRight_toRightOf="parent"
-                android:layout_marginLeft="8dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintHorizontal_bias="0.0"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp" />
+                android:gravity="center|left"
+                tools:text="hello" />
 
-            <ImageView
-                android:id="@+id/image"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintVertical_bias="0.0" />
-
-        </android.support.constraint.ConstraintLayout>
+        </LinearLayout>
 
     </android.support.v7.widget.CardView>
 

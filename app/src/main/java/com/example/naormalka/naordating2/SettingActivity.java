@@ -1,7 +1,10 @@
 package com.example.naormalka.naordating2;
 
+import android.*;
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -44,6 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SettingActivity extends AppCompatActivity {
+    public static final int PICK_FROM_GALLERY = 1;
     private EditText etName;
     private EditText etPhone;
     private Button btnBack;
@@ -56,16 +61,13 @@ public class SettingActivity extends AppCompatActivity {
     private String phone;
     private String profileUrl;
     private Uri resultUri;
-    ImageLoader imageLoader;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(ImageLoaderConfiguration.createDefault(SettingActivity.this));
-
 
         String userSex = getIntent().getExtras().getString("userSex");
 
@@ -76,6 +78,8 @@ public class SettingActivity extends AppCompatActivity {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(SettingActivity.this,MainActivity.class);
+                startActivity(intent);
                 finish();
                 return;
             }
@@ -90,9 +94,14 @@ public class SettingActivity extends AppCompatActivity {
         mProfileImageVIew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                intent.setType("image/*");
-                startActivityForResult(intent, 1);
+                if (ActivityCompat.checkSelfPermission(SettingActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(SettingActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PICK_FROM_GALLERY);
+                }
+                else {
+                    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    intent.setType("image/*");
+                    startActivityForResult(intent, PICK_FROM_GALLERY);
+                }
             }
         });
 
@@ -104,6 +113,8 @@ public class SettingActivity extends AppCompatActivity {
         });
     }
 
+
+
     private void getUSerInfo() {
         mCoustomerDataBase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -112,15 +123,18 @@ public class SettingActivity extends AppCompatActivity {
                     Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
                     if (map.get("name") != null) {
                         name = map.get("name").toString();
+                        Toast.makeText(SettingActivity.this, name, Toast.LENGTH_SHORT).show();
                         etName.setText(name);
                     }
                     if (map.get("phone") != null) {
                         phone = map.get("phone").toString();
+                        Toast.makeText(SettingActivity.this, phone, Toast.LENGTH_SHORT).show();
                         etPhone.setText(phone);
                     }
 
                     if (map.get("profileImageUrl") != null) {
                         profileUrl = map.get("profileImageUrl").toString();
+                        Toast.makeText(SettingActivity.this, profileUrl, Toast.LENGTH_SHORT).show();
                         Glide.with(getApplication()).load(profileUrl).into(mProfileImageVIew);
                     }
                 }
@@ -187,8 +201,9 @@ public class SettingActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+        if (requestCode == PICK_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
             try {
                 final Uri imageUri = data.getData();
                 resultUri = imageUri;
@@ -208,12 +223,27 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PICK_FROM_GALLERY:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(galleryIntent, PICK_FROM_GALLERY);
+                } else {
+                    Toast.makeText(this, "naor", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+    }
+
+
+    @Override
     public void onBackPressed() {
         super.onBackPressed();
        Intent intent = new Intent(SettingActivity.this,MainActivity.class);
         startActivity(intent);
         finish();
         return;
-
     }
 }
