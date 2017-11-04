@@ -75,6 +75,7 @@ public class ArrayAdapterCards extends android.widget.ArrayAdapter<Cards> {
 
 
 
+
         return convertView;
     }
 
