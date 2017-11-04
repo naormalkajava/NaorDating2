@@ -41,12 +41,12 @@ public class NewMatchFragment extends DialogFragment {
 
         TypefaceProvider.registerDefaultIconSets();
 
-    //   profile1 = (CircleImageView) v.findViewById(R.id.profile1);
-    //   profile2 = (CircleImageView) v.findViewById(R.id.profile2);
-    //   btnKeepSurfing = (BootstrapButton) v.findViewById(R.id.keepSurfing);
-    //   btnNewConversion = (BootstrapButton) v.findViewById(R.id.btnConversion);
-    //   etprofile1 = (TextView) v.findViewById(R.id.etprofile1);
-    //   etprofile2 = (TextView) v.findViewById(R.id.etprofile2);
+        //   profile1 = (CircleImageView) v.findViewById(R.id.profile1);
+        //   profile2 = (CircleImageView) v.findViewById(R.id.profile2);
+        //   btnKeepSurfing = (BootstrapButton) v.findViewById(R.id.keepSurfing);
+        //   btnNewConversion = (BootstrapButton) v.findViewById(R.id.btnConversion);
+        //   etprofile1 = (TextView) v.findViewById(R.id.etprofile1);
+        //   etprofile2 = (TextView) v.findViewById(R.id.etprofile2);
 
         return v;
 

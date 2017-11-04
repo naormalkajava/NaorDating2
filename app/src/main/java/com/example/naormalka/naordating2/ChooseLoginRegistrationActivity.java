@@ -34,6 +34,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChooseLoginRegistrationActivity extends AppCompatActivity {
 
@@ -51,7 +53,9 @@ public class ChooseLoginRegistrationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         TypefaceProvider.registerDefaultIconSets();
-        mAuth = FirebaseAuth.getInstance();
+
+            mAuth = FirebaseAuth.getInstance();
+
         setContentView(R.layout.activity_choose_login_registration);
         firebaseAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -119,7 +123,9 @@ public class ChooseLoginRegistrationActivity extends AppCompatActivity {
                                 try {
 
                                     gender = object.getString("gender");
+                                    Toast.makeText(ChooseLoginRegistrationActivity.this, gender, Toast.LENGTH_SHORT).show();
                                     birthday = object.getString("birthday");
+                                    Toast.makeText(ChooseLoginRegistrationActivity.this, birthday, Toast.LENGTH_SHORT).show();
 
 
 
@@ -179,14 +185,18 @@ public class ChooseLoginRegistrationActivity extends AppCompatActivity {
     }
     private void registerToFireBase() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference userref = FirebaseDatabase.getInstance().getReference().child("Users").child(gender.toLowerCase()).child(currentUser.getUid()).child("name");
-        userref.setValue(currentUser.getDisplayName());
+        DatabaseReference userref = FirebaseDatabase.getInstance().getReference().child("Users").child(gender.toLowerCase()).child(currentUser.getUid());
+        Map userInfo = new HashMap();
+        userInfo.put("name",currentUser.getDisplayName());
+        userInfo.put("profileImageUrl","defalut");
+        userref.updateChildren(userInfo);
     }
     private void gotoMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String displayName = currentUser.getDisplayName();
         intent.putExtra("userName",displayName);
+        intent.putExtra("gender",gender);
         intent.putExtra("birthday",birthday);
         startActivity(intent);
     }

@@ -61,7 +61,7 @@ public class SettingActivity extends AppCompatActivity {
     private String phone;
     private String profileUrl;
     private Uri resultUri;
-
+    private String userSex;
 
 
     @Override
@@ -69,16 +69,22 @@ public class SettingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
 
-        String userSex = getIntent().getExtras().getString("userSex");
+
+        userSex = getIntent().getExtras().getString("userSex").toLowerCase();
+
+
 
         etName = (EditText) findViewById(R.id.name);
+
         etPhone = (EditText) findViewById(R.id.phone);
+
+
 
         btnBack = (Button) findViewById(R.id.back);
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(SettingActivity.this,MainActivity.class);
+                Intent intent = new Intent(SettingActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
                 return;
@@ -94,10 +100,9 @@ public class SettingActivity extends AppCompatActivity {
         mProfileImageVIew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (ActivityCompat.checkSelfPermission(SettingActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                if (ActivityCompat.checkSelfPermission(SettingActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(SettingActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PICK_FROM_GALLERY);
-                }
-                else {
+                } else {
                     Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     intent.setType("image/*");
                     startActivityForResult(intent, PICK_FROM_GALLERY);
@@ -113,31 +118,39 @@ public class SettingActivity extends AppCompatActivity {
         });
     }
 
-
-
     private void getUSerInfo() {
         mCoustomerDataBase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
+
                 if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
                     Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
                     if (map.get("name") != null) {
                         name = map.get("name").toString();
-                        Toast.makeText(SettingActivity.this, name, Toast.LENGTH_SHORT).show();
                         etName.setText(name);
                     }
                     if (map.get("phone") != null) {
                         phone = map.get("phone").toString();
-                        Toast.makeText(SettingActivity.this, phone, Toast.LENGTH_SHORT).show();
                         etPhone.setText(phone);
                     }
-
                     if (map.get("profileImageUrl") != null) {
                         profileUrl = map.get("profileImageUrl").toString();
-                        Toast.makeText(SettingActivity.this, profileUrl, Toast.LENGTH_SHORT).show();
-                        Glide.with(getApplication()).load(profileUrl).into(mProfileImageVIew);
+                        switch (profileUrl) {
+                            case "default" :
+                                Glide.with(getApplication()).load(R.drawable.profilelancher).into(mProfileImageVIew);
+                                break;
+                            default:
+                                Glide.with(getApplication()).load(profileUrl).into(mProfileImageVIew);
+                                break;
+                        }
+
                     }
+
+
+               //     Glide.with(getApplication()).load(profileUrl).into(mProfileImageVIew);
                 }
+
 
             }
 
@@ -241,7 +254,7 @@ public class SettingActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-       Intent intent = new Intent(SettingActivity.this,MainActivity.class);
+        Intent intent = new Intent(SettingActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
         return;

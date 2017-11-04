@@ -6,6 +6,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 
 import android.net.Uri;
@@ -14,11 +17,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -45,9 +51,28 @@ public class ArrayAdapterCards extends android.widget.ArrayAdapter<Cards> {
 
         TextView name = (TextView) convertView.findViewById(R.id.name);
         ImageView image = (ImageView) convertView.findViewById(R.id.image23);
+
         name.setText(cards_item.getName());
-        String profileImageUrl = cards_item.getProfileImageUrl();
-        Glide.with(getContext()).load().dontAnimate().into(image);
+
+   //  if (cards_item.getProfileImageUrl().contains("defalut")) {
+   //      Glide.with(getContext()).load(R.drawable.profilelancher).into(image);
+   //  }
+   //  else
+   //  {
+   //      Glide.with(convertView.getContext()).load(cards_item.getProfileImageUrl()).into(image);
+   //  }
+  switch (cards_item.getProfileImageUrl()) {
+      case "default" :
+          Glide.with(convertView.getContext()).load(R.mipmap.ic_launcher).into(image);
+          break;
+          default:
+              Glide.clear(image);
+              Glide.with(convertView.getContext()).load(cards_item.getProfileImageUrl()).into(image);
+              break;
+  }
+
+
+
 
 
         return convertView;

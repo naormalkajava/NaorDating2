@@ -33,8 +33,9 @@
         <activity android:name=".RegistrationActivity" />
         <activity android:name=".ChooseLoginRegistrationActivity" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".FirstPageActivity"></activity>
-        <activity android:name=".SettingActivity"></activity>
+        <activity android:name=".FirstPageActivity"/>
+        <activity android:name=".SettingActivity"
+            android:label="aaa"/>
     </application>
 
 </manifest>
