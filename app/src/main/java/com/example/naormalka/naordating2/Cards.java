@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class Cards implements Serializable {
     private String userId;
     private String name;
-    private String profileImageUrl = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
+    private String profileImageUrl;
 
     public Cards() {
     }
@@ -17,7 +17,6 @@ public class Cards implements Serializable {
     public Cards(String userId, String name, String profileImageUrl) {
         this.userId = userId;
         this.name = name;
-        if (profileImageUrl != null)
         this.profileImageUrl = profileImageUrl;
     }
 

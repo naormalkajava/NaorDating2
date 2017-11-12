@@ -1,15 +1,11 @@
 package com.example.naormalka.naordating2;
 
-import android.*;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -23,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,15 +30,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +45,7 @@ public class SettingActivity extends AppCompatActivity {
     private Button btnconform;
     private ImageView mProfileImageVIew;
     private FirebaseAuth mAuth;
-    private DatabaseReference mCoustomerDataBase;
+    private DatabaseReference mUserDtaBase;
     private String userId;
     private String name;
     private String phone;
@@ -68,11 +58,6 @@ public class SettingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
-
-
-        userSex = getIntent().getExtras().getString("userSex").toLowerCase();
-
-
 
         etName = (EditText) findViewById(R.id.name);
 
@@ -95,7 +80,7 @@ public class SettingActivity extends AppCompatActivity {
         mProfileImageVIew = (ImageView) findViewById(R.id.profileimage);
         mAuth = FirebaseAuth.getInstance();
         userId = mAuth.getCurrentUser().getUid();
-        mCoustomerDataBase = FirebaseDatabase.getInstance().getReference().child("Users").child(userSex).child(userId);
+        mUserDtaBase = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
         getUSerInfo();
         mProfileImageVIew.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,11 +104,9 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     private void getUSerInfo() {
-        mCoustomerDataBase.addListenerForSingleValueEvent(new ValueEventListener() {
+        mUserDtaBase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-
                 if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
                     Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
                     if (map.get("name") != null) {
@@ -134,11 +117,15 @@ public class SettingActivity extends AppCompatActivity {
                         phone = map.get("phone").toString();
                         etPhone.setText(phone);
                     }
+                    if (map.get("sex") != null) {
+                        userSex = map.get("sex").toString();
+                    }
+                    Glide.clear(mProfileImageVIew);
                     if (map.get("profileImageUrl") != null) {
                         profileUrl = map.get("profileImageUrl").toString();
                         switch (profileUrl) {
-                            case "default" :
-                                Glide.with(getApplication()).load(R.drawable.profilelancher).into(mProfileImageVIew);
+                            case "defalut" :
+                                Glide.with(getApplication()).load(R.mipmap.ic_launcher).into(mProfileImageVIew);
                                 break;
                             default:
                                 Glide.with(getApplication()).load(profileUrl).into(mProfileImageVIew);
@@ -147,13 +134,9 @@ public class SettingActivity extends AppCompatActivity {
 
                     }
 
-
                //     Glide.with(getApplication()).load(profileUrl).into(mProfileImageVIew);
                 }
-
-
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
@@ -169,7 +152,7 @@ public class SettingActivity extends AppCompatActivity {
         Map userInfo = new HashMap();
         userInfo.put("name", name);
         userInfo.put("phone", phone);
-        mCoustomerDataBase.updateChildren(userInfo);
+        mUserDtaBase.updateChildren(userInfo);
         if (resultUri != null) {
             StorageReference filepath = FirebaseStorage.getInstance().getReference().child("profileImages").child(userId);
             Bitmap bitmap = null;
@@ -196,7 +179,7 @@ public class SettingActivity extends AppCompatActivity {
 
                     Map userInfo = new HashMap();
                     userInfo.put("profileImageUrl", downloadUrl.toString());
-                    mCoustomerDataBase.updateChildren(userInfo);
+                    mUserDtaBase.updateChildren(userInfo);
 
                     Intent intent = new Intent(SettingActivity.this, MainActivity.class);
                     startActivity(intent);

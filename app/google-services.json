@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "765468083497-rao9oqinvan2683tqq2jq501rpmcn2ib.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.naormalka.naordating2",
+            "certificate_hash": "cd5344f89d86e8c738fd010251caa04683640cdc"
+          }
+        },
+        {
           "client_id": "765468083497-jn0s5bt67o8dm6mdu2ca65o3s8ct744k.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

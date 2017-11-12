@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -48,7 +47,6 @@ import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,7 +60,7 @@ public class MainActivity extends AppCompatActivity
     private String name;
     private String photoUrl;
     private String oppisteUser;
-    private DatabaseReference userDb;
+    private DatabaseReference usersDb;
     private List<Cards> rowItems;
 
     private SwipeFlingAdapterView flingContainer;
@@ -127,29 +125,29 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
 
-like = (BootstrapCircleThumbnail) findViewById(R.id.like);
-like.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
+        like = (BootstrapCircleThumbnail) findViewById(R.id.like);
+        like.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-        if (rowItems.isEmpty()) return;
+                if (rowItems.isEmpty()) return;
 
-        flingContainer.getTopCardListener().selectRight();
-        flingContainer.getTopCardListener().setRotationDegrees(60f);
-    }
-});
-dislike = (BootstrapCircleThumbnail) findViewById(R.id.dislike);
-dislike.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        if (rowItems.isEmpty()) return;
-        flingContainer.getTopCardListener().selectLeft();
-        flingContainer.getTopCardListener().setRotationDegrees(60f);
+                flingContainer.getTopCardListener().selectRight();
+                flingContainer.getTopCardListener().setRotationDegrees(60f);
+            }
+        });
+        dislike = (BootstrapCircleThumbnail) findViewById(R.id.dislike);
+        dislike.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (rowItems.isEmpty()) return;
+                flingContainer.getTopCardListener().selectLeft();
+                flingContainer.getTopCardListener().setRotationDegrees(60f);
 
-    }
- });
+            }
+        });
 
-        userDb = FirebaseDatabase.getInstance().getReference().child("Users");
+        usersDb = FirebaseDatabase.getInstance().getReference().child("Users");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -244,7 +242,7 @@ dislike.setOnClickListener(new View.OnClickListener() {
         });
 
         SwipeCard();
-      progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
 
     }
@@ -292,7 +290,7 @@ dislike.setOnClickListener(new View.OnClickListener() {
                 Cards obj = (Cards) dataObject;
                 String userId = obj.getUserId();
                 String name = obj.getName();
-                userDb.child(oppisteUser).child(userId).child("connections").child("nope").child(currentUser.getUid()).setValue(true);
+                usersDb.child(userId).child("connections").child("nope").child(currentUser.getUid()).setValue(true);
 
 
             }
@@ -328,7 +326,7 @@ dislike.setOnClickListener(new View.OnClickListener() {
 
         final DatabaseReference userDb = FirebaseDatabase.getInstance().getReference("Users");
 
-        final DatabaseReference currectuserConnectionDB = userDb.child(userSex).child(currentUser.getUid()).child("connections").child("yeps").child(userId);
+        final DatabaseReference currectuserConnectionDB = userDb.child(currentUser.getUid()).child("connections").child("yeps").child(userId);
         currectuserConnectionDB.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -337,11 +335,11 @@ dislike.setOnClickListener(new View.OnClickListener() {
                     String displayName = userDb1.getDisplayName();
                     String profileImage = userDb1.getProfileImage();
 
-                    userDb.child(oppisteUser).child(dataSnapshot.getKey()).child("connections").child("matches").child(currentUser.getUid()).setValue(true);
-                    userDb.child(userSex).child(currentUser.getUid()).child("connections").child("matches").child(dataSnapshot.getKey()).setValue(true);
+                    userDb.child(dataSnapshot.getKey()).child("connections").child("matches").child(currentUser.getUid()).setValue(true);
+                    userDb.child(currentUser.getUid()).child("connections").child("matches").child(dataSnapshot.getKey()).setValue(true);
                     Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                     v.vibrate(500);
-                  //  showChatList(displayName, profileImage);
+                    //  showChatList(displayName, profileImage);
 
 
                 }
@@ -354,7 +352,6 @@ dislike.setOnClickListener(new View.OnClickListener() {
         });
 
     }
-
 
 
     private String readImageFromFireBase(String userGender, String userUid) {
@@ -430,9 +427,6 @@ dislike.setOnClickListener(new View.OnClickListener() {
         if (id == R.id.action_SettingUser) {
 
             Intent intent = new Intent(MainActivity.this, SettingActivity.class);
-
-            intent.putExtra("userSex", readGender());
-
             startActivity(intent);
 
         }
@@ -452,13 +446,8 @@ dislike.setOnClickListener(new View.OnClickListener() {
         } else if (id == R.id.nav_chat) {
 
 
-
-
-
-
         } else if (id == R.id.nav_location) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.ee,new Chat_fragment()).commit();
-
+            getSupportFragmentManager().beginTransaction().replace(R.id.ee, new Chat_fragment()).commit();
 
 
         } else if (id == R.id.nav_setting) {
@@ -482,88 +471,53 @@ dislike.setOnClickListener(new View.OnClickListener() {
 
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         //if (currentUser == null) return;
-        DatabaseReference maleDB = FirebaseDatabase.getInstance().getReference().child("Users").child("male");
-        maleDB.addChildEventListener(new ChildEventListener() {
+        DatabaseReference UserDb = usersDb.child(currentUser.getUid());
+        UserDb.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getKey().equals(currentUser.getUid())) {
-                    userSex = "male";
-                    oppisteUser = "female";
-                    getOppositeSexUSer();
+                    if (dataSnapshot.exists()) {
+                        if (dataSnapshot.child("sex") != null) {
+                            userSex = dataSnapshot.child("sex").getValue().toString();
+                            oppisteUser = "female";
+                            switch (userSex) {
+                                case "male":
+                                    oppisteUser = "female";
+                                    break;
+                                case "female":
+                                    oppisteUser = "male";
+                                    break;
+                            }
+                            getOppositeSexUSer();
+                        }
+                    }
 
                 }
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
             public void onCancelled(DatabaseError databaseError) {
+
             }
         });
 
 
-        // female DataBase
-
-        DatabaseReference femaleDB = FirebaseDatabase.getInstance().getReference().child("Users").child("female");
-        femaleDB.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if (dataSnapshot.getKey().equals(currentUser.getUid())) {
-                    userSex = "female";
-                    oppisteUser = "male";
-
-                    getOppositeSexUSer();
-
-
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
     }
 
     public void getOppositeSexUSer() {
-        final DatabaseReference oppositeDB = FirebaseDatabase.getInstance().getReference().child("Users").child(oppisteUser);
-        oppositeDB.addChildEventListener(new ChildEventListener() {
+
+        usersDb.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                if (dataSnapshot.exists() && !dataSnapshot.child("connections").child("nope").hasChild(currentUser.getUid()) && !dataSnapshot.child("connections").child("yeps").hasChild(currentUser.getUid())) {
-
+                if (dataSnapshot.exists() && !dataSnapshot.child("connections").child("nope").hasChild(currentUser.getUid()) && !dataSnapshot.child("connections").child("yeps").hasChild(currentUser.getUid()) && dataSnapshot.child("sex").getValue().toString().equals(oppisteUser)) {
                     String imageUrl = "default";
-                   if (!dataSnapshot.child("profileImageUrl").getValue().equals("default")) {
-                       imageUrl = dataSnapshot.child("profileImageUrl").getValue().toString();
-                   }
-
+                    if (!dataSnapshot.child("profileImageUrl").getValue().equals("default")) {
+                        imageUrl = dataSnapshot.child("profileImageUrl").getValue().toString();
+                    }
                     Cards item = new Cards(dataSnapshot.getKey(), dataSnapshot.child("name").getValue().toString(), imageUrl);
                     rowItems.add(item);
-
                     arrayAdapterCards.notifyDataSetChanged();
-
                 }
             }
 
@@ -591,9 +545,8 @@ dislike.setOnClickListener(new View.OnClickListener() {
         final String userId = obj.getUserId();
         String name = obj.getName();
         String profileImageUrl = obj.getProfileImageUrl();
-        userDb.child(oppisteUser).child(userId).child("connections").child("yeps").child(currentUser.getUid()).setValue(true);
+        usersDb.child(userId).child("connections").child("yeps").child(currentUser.getUid()).setValue(true);
         isConnectionMatch(userId, name, profileImageUrl);
-
     }
 
     private String readGender() {
@@ -636,5 +589,3 @@ dislike.setOnClickListener(new View.OnClickListener() {
     }
 
 }
-
-

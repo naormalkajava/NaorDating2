@@ -185,9 +185,10 @@ public class ChooseLoginRegistrationActivity extends AppCompatActivity {
     }
     private void registerToFireBase() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference userref = FirebaseDatabase.getInstance().getReference().child("Users").child(gender.toLowerCase()).child(currentUser.getUid());
+        DatabaseReference userref = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid());
         Map userInfo = new HashMap();
         userInfo.put("name",currentUser.getDisplayName());
+        userInfo.put("sex",gender.toLowerCase());
         userInfo.put("profileImageUrl","defalut");
         userref.updateChildren(userInfo);
     }
