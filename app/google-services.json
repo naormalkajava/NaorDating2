@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "765468083497-t4tmjonp76o7in0rrms49qi0c1qkeha1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.naormalka.naordating2",
+            "certificate_hash": "4590273165feaa8004cf7456882d89db5532cfb3"
+          }
+        },
+        {
+          "client_id": "765468083497-jeptcj2pebvl71mope1t2e9lfih6m36k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.naormalka.naordating2",
+            "certificate_hash": "a343c7560dbc4e0d6215b095bd5466068d41ea98"
+          }
+        },
+        {
           "client_id": "765468083497-rao9oqinvan2683tqq2jq501rpmcn2ib.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -54,29 +54,23 @@ public class ArrayAdapterCards extends android.widget.ArrayAdapter<Cards> {
 
         name.setText(cards_item.getName());
 
-   //  if (cards_item.getProfileImageUrl().contains("defalut")) {
-   //      Glide.with(getContext()).load(R.drawable.profilelancher).into(image);
-   //  }
-   //  else
-   //  {
-   //      Glide.with(convertView.getContext()).load(cards_item.getProfileImageUrl()).into(image);
-   //  }
-  switch (cards_item.getProfileImageUrl()) {
-      case "default" :
-          Glide.with(convertView.getContext()).load(R.mipmap.ic_launcher).into(image);
-          break;
-          default:
-              Glide.clear(image);
-              Glide.with(convertView.getContext()).load(cards_item.getProfileImageUrl()).into(image);
-              break;
-  }
+        //  if (cards_item.getProfileImageUrl().contains("defalut")) {
+        //      Glide.with(getContext()).load(R.drawable.profilelancher).into(image);
+        //  }
+        //  else
+        //  {
+        //      Glide.with().load(cards_item.getProfileImageUrl()).into(image);
+        //  }
+        if (cards_item.getProfileImageUrl().contains("defalut")) {
+            Glide.with(convertView.getContext()).load(R.mipmap.ic_launcher).into(image);
+        }
+        else
+        {
+            Glide.with(convertView.getContext()).load(cards_item.getProfileImageUrl()).into(image);
+        }
 
 
-
-
-
-
-        return convertView;
+            return convertView;
     }
 
 

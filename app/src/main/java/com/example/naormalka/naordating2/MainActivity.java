@@ -62,10 +62,8 @@ public class MainActivity extends AppCompatActivity
     private String oppisteUser;
     private DatabaseReference usersDb;
     private List<Cards> rowItems;
-
     private SwipeFlingAdapterView flingContainer;
     private ArrayAdapterCards arrayAdapterCards;
-
     private FirebaseAuth mAuth;
     private BootstrapCircleThumbnail like;
     private BootstrapCircleThumbnail dislike;
@@ -77,11 +75,8 @@ public class MainActivity extends AppCompatActivity
     String profileImageUrl12;
     UserChat userDb1;
 
-
     void sha1() {
         try {
-
-
             PackageInfo info = getPackageManager().getPackageInfo("com.example.naormalka.naordating2", PackageManager.GET_SIGNATURES);
             for (android.content.pm.Signature signature : info.signatures) {
                 MessageDigest md = MessageDigest.getInstance("SHA");
@@ -99,8 +94,6 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         sha1();
-
-
     }
 
     @Override
@@ -203,9 +196,11 @@ public class MainActivity extends AppCompatActivity
         ivProfile = (ImageView) hView.findViewById(R.id.profile);
         etProfile = (TextView) hView.findViewById(R.id.etProfile);
 
+
+
         String userName = readUserName();
         String gender = readGender();
-        dataUserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(gender.toLowerCase()).child(currentUser.getUid());
+        dataUserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid());
         dataUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -215,21 +210,18 @@ public class MainActivity extends AppCompatActivity
                     if (map.get("name") != null) {
                         name = map.get("name").toString();
                         etProfile.setText(name);
-
-
                     }
-                    if (map.get("phone") != null) {
-
-
-                    }
-
                     if (map.get("profileImageUrl") != null) {
-
                         photoUrl = map.get("profileImageUrl").toString();
-                        Glide.with(MainActivity.this).load(photoUrl).into(ivProfile);
+                   if (photoUrl.contains("defalut")) {
+                       Glide.with(MainActivity.this).load(R.mipmap.ic_launcher).into(ivProfile);
+                   }
+                   else
+                   {
+                       Glide.with(MainActivity.this).load(photoUrl).into(ivProfile);
+                   }
 
                     }
-
                 }
 
                 userDb1 = new UserChat(name, photoUrl);
@@ -505,6 +497,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void getOppositeSexUSer() {
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
 
         usersDb.addChildEventListener(new ChildEventListener() {
             @Override
